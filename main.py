@@ -5,7 +5,7 @@
 from nsnitro import NSNitro, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
 # Global Nitro instance
-g_nitro = NSNitro('NS01', 'nsroot', 'nsroot')
+g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
 
 def main():
     # 0) Login to NetScaler
