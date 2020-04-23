@@ -45,14 +45,14 @@ def create_server(name, ip):
     except Exception as e:
         print e
 
-def create_virtual_server(name, ip, port, cltimeout, persistencetype, servicetype):
+def create_virtual_server(name, ip, port, clttimeout, persistencetype, servicetype):
     global g_nitro
     try:
         new_virtual_server = NSLBVServer()
         new_virtual_server.set_name(name)
         new_virtual_server.set_ipv46(ip)
         new_virtual_server.set_port(port)
-        new_virtual_server.set_clttimeout(cltimeout)
+        new_virtual_server.set_clttimeout(clttimeout)
         new_virtual_server.set_persistencetype(persistencetype)
         new_virtual_server.set_servicetype(servicetype)
         NSLBVServer.add(g_nitro, new_virtual_server)
