@@ -10,7 +10,7 @@ g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
 def main():
     # 0) Login to NetScaler
     init_nitro()
-    # add a save at the beginning
+    # TODO: add a config save at the beginning
     # 1) Create LB vServer
     create_virtual_server("test-vserver", "99.99.99.2", 5000, 180, "NONE", "HTTP")
     # 2) Create Service Group
@@ -22,7 +22,7 @@ def main():
     bind_monitor_to_service_group("http", "test-sgroup")
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
-    # add a save at the end
+    # TODO: add a config save at the end
 
 def init_nitro():
     global g_nitro
