@@ -7,9 +7,9 @@ import requests
 # https://github.com/ndenev/nsnitro
 from nsnitro import NSNitro, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
-# Global Nitro instance
-g_nitro = NSNitro("NS01", "nsroot", "nsroot")
-        
+# Global Nitro instance    
+g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
+
 def main():
     env_issue_id = os.getenv('ISSUE_ID')
     if not env_issue_id:
@@ -19,7 +19,7 @@ def main():
     request = LBvServerRequest(env_issue_id)
     # 0) Login to NetScaler
     init_nitro()
-    # add a save at the beginning
+    # TODO: add a config save at the beginning
     # 1) Create LB vServer
     create_virtual_server(
         request.vserver_name,
@@ -46,7 +46,7 @@ def main():
     )
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
-    # add a save at the end
+    # TODO: add a config save at the end
 
 def init_nitro():
     global g_nitro
@@ -69,14 +69,14 @@ def create_server(name, ip):
     except Exception as e:
         print e
 
-def create_virtual_server(name, ip, port, cltimeout, persistencetype, servicetype):
+def create_virtual_server(name, ip, port, clttimeout, persistencetype, servicetype):
     global g_nitro
     try:
         new_virtual_server = NSLBVServer()
         new_virtual_server.set_name(name)
         new_virtual_server.set_ipv46(ip)
         new_virtual_server.set_port(port)
-        new_virtual_server.set_clttimeout(cltimeout)
+        new_virtual_server.set_clttimeout(clttimeout)
         new_virtual_server.set_persistencetype(persistencetype)
         new_virtual_server.set_servicetype(servicetype)
         NSLBVServer.add(g_nitro, new_virtual_server)
