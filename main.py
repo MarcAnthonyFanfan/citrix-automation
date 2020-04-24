@@ -133,7 +133,7 @@ def bind_monitor_to_service_group(monitor_name, service_group_name):
 class LBvServerRequest:
     def __init__(self, issue_key):
         try:
-            self.issue_json = requests.get("http://deb10-jira.cdatraining.lab:8080/rest/api/2/issue/%s" % issue_key, auth=("jenkins", "qRRXeefBvt")).json()
+            self.issue_json = requests.get("http://172.16.100.205:8080/rest/api/2/issue/%s" % issue_key, auth=("jenkins", "qRRXeefBvt")).json()
             self.vserver_name = self.issue_json["fields"]["customfield_10200"]
             self.vserver_ip_address = self.issue_json["fields"]["customfield_10201"]
             self.vserver_port = int(self.issue_json["fields"]["customfield_10202"])
