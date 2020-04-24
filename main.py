@@ -1,25 +1,49 @@
 # NITRO API Automation Use Case 1
 
+import os
+import requests
+
 # Utilizes Simple Python Library to control Citrix Netscaler 9.2+ load balancers with NITRO API
 # https://github.com/ndenev/nsnitro
 from nsnitro import NSNitro, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
 # Global Nitro instance
-g_nitro = NSNitro('NS01', 'nsroot', 'nsroot')
-
+g_nitro = NSNitro("NS01", "nsroot", "nsroot")
+        
 def main():
+    env_issue_id = os.getenv('ISSUE_ID')
+    if not env_issue_id:
+        print "Missing ISSUE_ID environment variable"
+        print "exiting..."
+        exit()
+    request = LBvServerRequest(env_issue_id)
     # 0) Login to NetScaler
     init_nitro()
     # add a save at the beginning
     # 1) Create LB vServer
-    create_virtual_server("test-vserver", "99.99.99.2", 5000, 180, "NONE", "HTTP")
+    create_virtual_server(
+        request.vserver_name,
+        request.vserver_ip_address,
+        request.vserver_port,
+        request.vserver_clttimeout,
+        request.vserver_persistence_type,
+        request.vserver_service_type
+    )
     # 2) Create Service Group
-    create_service_group("test-sgroup", "HTTP")
+    create_service_group(request.service_group_name, request.service_group_service_type)
     # 3) Bind Backend Servers to Service Group
-    create_server("test-server", "99.99.99.1")
-    bind_service_group_to_server("test-sgroup", "test-server", 80, 1)
+    create_server(request.backend_server_name, request.backend_server_ip)
+    bind_service_group_to_server(
+        request.service_group_name,
+        request.backend_server_name,
+        request.service_group_binding_port,
+        request.service_group_binding_weight
+    )
     # 4) Binding a monitor to Service Group
-    bind_monitor_to_service_group("http", "test-sgroup")
+    bind_monitor_to_service_group(
+        request.monitor_name,
+        request.service_group_name
+    )
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
     # add a save at the end
@@ -105,6 +129,29 @@ def bind_monitor_to_service_group(monitor_name, service_group_name):
         print "Bound monitor: %s to service group: %s" % (monitor_name, service_group_name)
     except Exception as e:
         print e
+
+class LBvServerRequest:
+    def __init__(self, issue_key):
+        try:
+            self.issue_json = requests.get("http://deb10-jira.cdatraining.lab:8080/rest/api/2/issue/%s" % issue_key, auth=("jenkins", "qRRXeefBvt")).json()
+            self.vserver_name = self.issue_json["fields"]["customfield_10200"]
+            self.vserver_ip_address = self.issue_json["fields"]["customfield_10201"]
+            self.vserver_port = int(self.issue_json["fields"]["customfield_10202"])
+            self.vserver_clttimeout = int(self.issue_json["fields"]["customfield_10203"])
+            self.vserver_persistence_type = self.issue_json["fields"]["customfield_10204"]["value"]
+            self.vserver_service_type = self.issue_json["fields"]["customfield_10205"]["value"]
+            self.service_group_name = self.issue_json["fields"]["customfield_10206"]
+            self.service_group_service_type = self.issue_json["fields"]["customfield_10207"]["value"]
+            self.backend_server_name = self.issue_json["fields"]["customfield_10208"]
+            self.backend_server_ip = self.issue_json["fields"]["customfield_10209"]
+            self.service_group_binding_port = int(self.issue_json["fields"]["customfield_10211"])
+            self.service_group_binding_weight = int(self.issue_json["fields"]["customfield_10212"])
+            self.monitor_name = self.issue_json["fields"]["customfield_10214"]["value"]
+        except:
+            print "Could not retrieve issue from Jira"
+            print "exiting..."
+            exit()
+            
 
 if __name__ == "__main__":
     main()
