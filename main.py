@@ -47,6 +47,7 @@ def main():
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
     # TODO: add a config save at the end
+    notify_jira_of_creation(env_issue_id)
 
 def init_nitro():
     global g_nitro
@@ -130,10 +131,28 @@ def bind_monitor_to_service_group(monitor_name, service_group_name):
     except Exception as e:
         print e
 
+def notify_jira_of_creation(issue_key):
+    headers = {'Content-type': 'application/json'}
+    r = requests.post(
+        "http://172.16.100.205:8080/rest/api/2/issue/%s/transitions" % issue_key,
+        auth = ("jenkins", "qRRXeefBvt"),
+        json = {
+            "transition": {
+                "id": "61"
+            }
+        },
+        headers = headers
+    )
+    print "http://172.16.100.205:8080/rest/api/2/issue/%s/transitions" % issue_key
+    print r
+
 class LBvServerRequest:
     def __init__(self, issue_key):
         try:
-            self.issue_json = requests.get("http://172.16.100.205:8080/rest/api/2/issue/%s" % issue_key, auth=("jenkins", "qRRXeefBvt")).json()
+            self.issue_json = requests.get(
+                "http://172.16.100.205:8080/rest/api/2/issue/%s" % issue_key,
+                auth = ("jenkins", "qRRXeefBvt")
+            ).json()
             self.vserver_name = self.issue_json["fields"]["customfield_10200"]
             self.vserver_ip_address = self.issue_json["fields"]["customfield_10201"]
             self.vserver_port = int(self.issue_json["fields"]["customfield_10202"])
