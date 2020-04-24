@@ -9,6 +9,9 @@ from nsnitro import NSNitro, NSServer, NSLBVServer, NSServiceGroup, NSServiceGro
 
 # Global Nitro instance    
 g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
+g_jira_base_url = "http://172.16.100.205:8080"
+g_jira_service_account_username = "jenkins"
+g_jira_service_account_password = "qRRXeefBvt"
 
 def main():
     env_issue_id = os.getenv('ISSUE_ID')
@@ -132,10 +135,11 @@ def bind_monitor_to_service_group(monitor_name, service_group_name):
         print e
 
 def notify_jira_of_creation(issue_key):
+    global g_jira_base_url, g_jira_service_account_username, g_jira_service_account_password
     headers = {'Content-type': 'application/json'}
     r = requests.post(
-        "http://172.16.100.205:8080/rest/api/2/issue/%s/transitions" % issue_key,
-        auth = ("jenkins", "qRRXeefBvt"),
+        g_jira_base_url + "/rest/api/2/issue/%s/transitions" % issue_key,
+        auth = (g_jira_service_account_username, g_jira_service_account_password),
         json = {
             "transition": {
                 "id": "61"
@@ -143,15 +147,18 @@ def notify_jira_of_creation(issue_key):
         },
         headers = headers
     )
-    print "http://172.16.100.205:8080/rest/api/2/issue/%s/transitions" % issue_key
-    print r
+    if r.status_code == 204:
+        print "Changed Jira issue status to Complete"
+    else:
+        print "Error changing Jira issue status"
 
 class LBvServerRequest:
     def __init__(self, issue_key):
         try:
+            global g_jira_base_url, g_jira_service_account_username, g_jira_service_account_password
             self.issue_json = requests.get(
-                "http://172.16.100.205:8080/rest/api/2/issue/%s" % issue_key,
-                auth = ("jenkins", "qRRXeefBvt")
+                g_jira_base_url + "/rest/api/2/issue/%s" % issue_key,
+                auth = (g_jira_service_account_username, g_jira_service_account_password)
             ).json()
             self.vserver_name = self.issue_json["fields"]["customfield_10200"]
             self.vserver_ip_address = self.issue_json["fields"]["customfield_10201"]
