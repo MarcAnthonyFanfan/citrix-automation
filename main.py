@@ -23,7 +23,9 @@ def main():
     # 0) Login to NetScaler
     init_nitro()
     save_nitro()
-    # TODO: add other persistence types
+    # TODO: Add other persistence types
+    #       Not a simple task, might be better to just
+    #       require users to config persistence manually
     # 1) Create LB vServer
     create_virtual_server(
         request.vserver_name,
@@ -189,6 +191,5 @@ class LBvServerRequest:
             print "exiting..."
             exit()
             
-
 if __name__ == "__main__":
     main()
