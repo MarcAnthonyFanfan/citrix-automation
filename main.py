@@ -23,6 +23,9 @@ def main():
     # 0) Login to NetScaler
     init_nitro()
     save_nitro()
+    # TODO: Transition Jira ticket to status="Jenkins Processing Request"
+    #       Currently, we skip directly to this step, when the request should
+    #       stay in status="Waiting on Jenkins" until this point in the script
     # TODO: Add other persistence types
     #       Not a simple task, might be better to just
     #       require users to config persistence manually
