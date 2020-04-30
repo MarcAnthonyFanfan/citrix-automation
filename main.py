@@ -5,7 +5,7 @@ import requests
 
 # Utilizes Simple Python Library to control Citrix Netscaler 9.2+ load balancers with NITRO API
 # https://github.com/ndenev/nsnitro
-from nsnitro import NSNitro, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
+from nsnitro import NSNitro, NSConfig, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
 # Global Nitro instance    
 g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
@@ -22,7 +22,8 @@ def main():
     request = LBvServerRequest(env_issue_id)
     # 0) Login to NetScaler
     init_nitro()
-    # TODO: add a config save at the beginning
+    save_nitro()
+    # TODO: add other persistence types
     # 1) Create LB vServer
     create_virtual_server(
         request.vserver_name,
@@ -49,14 +50,24 @@ def main():
     )
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
-    # TODO: add a config save at the end
+    save_nitro()
     notify_jira_of_creation(env_issue_id)
 
 def init_nitro():
     global g_nitro
     try:
         g_nitro.login()
-        print "Login Successful"
+        print "Login successful"
+    except Exception as e:
+        print e
+        print "exiting..."
+        exit()
+
+def save_nitro():
+    global g_nitro
+    try:
+        NSConfig().save(g_nitro)
+        print "Saved configuration"
     except Exception as e:
         print e
         print "exiting..."
