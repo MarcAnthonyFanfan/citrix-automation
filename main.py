@@ -77,18 +77,11 @@ def delete_lbvserver():
     init_nitro()
     save_nitro()
     # 1) Delete LB vServer
-    delete_virtual_server(
-        request.vserver_name,
-        request.vserver_ip_address,
-        request.vserver_port,
-        request.vserver_clttimeout,
-        request.vserver_persistence_type,
-        request.vserver_service_type
-    )
+    delete_virtual_server(request.vserver_name)
     # 2) Delete Service Group
-    delete_service_group(request.service_group_name, request.service_group_service_type)
+    delete_service_group(request.service_group_name)
     # 3) Delete Backend Server
-    delete_server(request.backend_server_name, request.backend_server_ip)
+    delete_server(request.backend_server_name)
     save_nitro()
 
 def init_nitro():
@@ -122,12 +115,11 @@ def create_server(name, ip):
     except Exception as e:
         print e
 
-def delete_server(name, ip):
+def delete_server(name):
     global g_nitro
     try:
         new_server = NSServer()
         new_server.set_name(name)
-        new_server.set_ipaddress(ip)
         NSServer.delete(g_nitro, new_server)
         print "Deleted server: %s %s" % (name, ip)
     except Exception as e:
@@ -148,16 +140,11 @@ def create_virtual_server(name, ip, port, clttimeout, persistencetype, servicety
     except Exception as e:
         print e
 
-def delete_virtual_server(name, ip, port, clttimeout, persistencetype, servicetype):
+def delete_virtual_server(name):
     global g_nitro
     try:
         virtual_server = NSLBVServer()
         virtual_server.set_name(name)
-        virtual_server.set_ipv46(ip)
-        virtual_server.set_port(port)
-        virtual_server.set_clttimeout(clttimeout)
-        virtual_server.set_persistencetype(persistencetype)
-        virtual_server.set_servicetype(servicetype)
         NSLBVServer.delete(g_nitro, virtual_server)
         print "Deleted virtual server: %s %s:%d" % (name, ip, port)
     except Exception as e:
@@ -174,12 +161,11 @@ def create_service_group(name, servicetype):
     except Exception as e:
         print e
 
-def delete_service_group(name, servicetype):
+def delete_service_group(name):
     global g_nitro
     try:
         service_group = NSServiceGroup()
         service_group.set_servicegroupname(name)
-        service_group.set_servicetype(servicetype)
         NSServiceGroup.delete(g_nitro, service_group)
         print "Deleted service group: %s %s" % (name, servicetype)
     except Exception as e:
