@@ -7,28 +7,33 @@ import requests
 # https://github.com/ndenev/nsnitro
 from nsnitro import NSNitro, NSConfig, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
-# Script must be passed action to know what to do
-g_env_action = os.getenv('ACTION')
-if not g_env_action:
-    print "Missing ACTION environment variable"
-    print "exiting..."
-    exit()
-
 # Global Nitro instance    
 g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
 g_jira_base_url = "http://172.16.100.205:8080"
 g_jira_service_account_username = "jenkins"
 g_jira_service_account_password = "qRRXeefBvt"
 
+# Global environment variable: ISSUE_ID
+g_env_issue_id = os.getenv('ISSUE_ID')
+if not g_env_issue_id:
+    print "Missing ISSUE_ID environment variable"
+    print "exiting..."
+    exit()
+
+# Global environment variable: ACTION
+g_env_action = os.getenv('ACTION')
+if not g_env_action:
+    print "Missing ACTION environment variable"
+    print "exiting..."
+    exit()
+
+
 def create_lbvserver():
-    env_issue_id = os.getenv('ISSUE_ID')
-    if not env_issue_id:
-        print "Missing ISSUE_ID environment variable"
-        print "exiting..."
-        exit()
+    global g_env_issue_id
     # Trigger transition to queued state on Jira
-    notify_jira_of_queueing(env_issue_id)
-    request = LBvServerRequest(env_issue_id)
+    notify_jira_of_queueing(g_env_issue_id)
+    # Get request details from Jira
+    request = LBvServerRequest(g_env_issue_id)
     # 0) Login to NetScaler
     init_nitro()
     save_nitro()
@@ -60,10 +65,19 @@ def create_lbvserver():
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
     save_nitro()
     # Trigger transition to created state on Jira
-    notify_jira_of_creation(env_issue_id)
+    notify_jira_of_creation(g_env_issue_id)
 
 def delete_lbvserver():
-    print "should delete lbvserver"
+    global g_env_issue_id
+    # Get request details from Jira
+    request = LBvServerRequest(g_env_issue_id)
+    # 0) Login to NetScaler
+    init_nitro()
+    save_nitro()
+    # 1) Delete LB vServer
+    delete_virtual_server(request.vserver_name, request.vserver_ip_address)
+    # 2) Delete Service Group
+    # 3) Delete Backend Server
 
 def init_nitro():
     global g_nitro
@@ -108,6 +122,16 @@ def create_virtual_server(name, ip, port, clttimeout, persistencetype, servicety
         new_virtual_server.set_servicetype(servicetype)
         NSLBVServer.add(g_nitro, new_virtual_server)
         print "Created new virtual server: %s %s:%d" % (name, ip, port)
+    except Exception as e:
+        print e
+
+def delete_virtual_server(name, ip):
+    global g_nitro
+    try:
+        virtual_server = NSLBVServer()
+        virtual_server.set_name(name)
+        virtual_server.set_ipv46(ip)
+        NSLBVServer.delete(g_nitro, virtual_server)
     except Exception as e:
         print e
 
