@@ -161,7 +161,7 @@ def notify_jira_of_queueing(issue_key):
         headers = headers
     )
     if r.status_code == 204:
-        print "Changed Jira issue status to Complete"
+        print "Changed Jira issue status to Queued"
     else:
         print "Error changing Jira issue status"
 
@@ -179,7 +179,7 @@ def notify_jira_of_creation(issue_key):
         headers = headers
     )
     if r.status_code == 204:
-        print "Changed Jira issue status to Queued"
+        print "Changed Jira issue status to Complete"
     else:
         print "Error changing Jira issue status"
 
