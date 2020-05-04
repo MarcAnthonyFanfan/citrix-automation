@@ -155,7 +155,7 @@ def notify_jira_of_queueing(issue_key):
         auth = (g_jira_service_account_username, g_jira_service_account_password),
         json = {
             "transition": {
-                "id": "61"
+                "id": "51"
             }
         },
         headers = headers
@@ -173,7 +173,7 @@ def notify_jira_of_creation(issue_key):
         auth = (g_jira_service_account_username, g_jira_service_account_password),
         json = {
             "transition": {
-                "id": "51"
+                "id": "61"
             }
         },
         headers = headers
