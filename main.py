@@ -7,13 +7,20 @@ import requests
 # https://github.com/ndenev/nsnitro
 from nsnitro import NSNitro, NSConfig, NSServer, NSLBVServer, NSServiceGroup, NSServiceGroupServerBinding, NSLBVServerServiceGroupBinding, NSLBMonitorServiceBinding
 
+# Script must be passed action to know what to do
+g_env_action = os.getenv('ACTION')
+if not g_env_action:
+    print "Missing ACTION environment variable"
+    print "exiting..."
+    exit()
+
 # Global Nitro instance    
 g_nitro = NSNitro('172.16.100.200', 'nsroot', 'nsroot')
 g_jira_base_url = "http://172.16.100.205:8080"
 g_jira_service_account_username = "jenkins"
 g_jira_service_account_password = "qRRXeefBvt"
 
-def main():
+def create_lbvserver():
     env_issue_id = os.getenv('ISSUE_ID')
     if not env_issue_id:
         print "Missing ISSUE_ID environment variable"
@@ -54,6 +61,9 @@ def main():
     save_nitro()
     # Trigger transition to created state on Jira
     notify_jira_of_creation(env_issue_id)
+
+def delete_lbvserver():
+    print "should delete lbvserver"
 
 def init_nitro():
     global g_nitro
@@ -208,6 +218,8 @@ class LBvServerRequest:
             print "Could not retrieve issue from Jira"
             print "exiting..."
             exit()
-            
-if __name__ == "__main__":
-    main()
+
+if g_env_action == "create_lbvserver":
+    create_lbvserver()
+elif g_env_action == "delete_lbvserver":
+    delete_lbvserver()
