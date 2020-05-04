@@ -1,3 +1,6 @@
+# Current Known Issue(s):
+#   1. Server/Group names cannot have spaces, possibly other special character limits as well
+
 # NITRO API Automation Use Case 1
 
 import os
@@ -26,7 +29,6 @@ if not g_env_action:
     print "Missing ACTION environment variable"
     print "exiting..."
     exit()
-
 
 def create_lbvserver():
     global g_env_issue_id
