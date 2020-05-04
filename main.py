@@ -87,6 +87,7 @@ def delete_lbvserver():
     delete_service_group(request.service_group_name, request.service_group_service_type)
     # 3) Delete Backend Server
     delete_server(request.backend_server_name, request.backend_server_ip)
+    save_nitro()
 
 def init_nitro():
     global g_nitro
