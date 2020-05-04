@@ -121,7 +121,7 @@ def delete_server(name):
         new_server = NSServer()
         new_server.set_name(name)
         NSServer.delete(g_nitro, new_server)
-        print "Deleted server: %s %s" % (name)
+        print "Deleted server: %s" % name
     except Exception as e:
         print e
 
@@ -146,7 +146,7 @@ def delete_virtual_server(name):
         virtual_server = NSLBVServer()
         virtual_server.set_name(name)
         NSLBVServer.delete(g_nitro, virtual_server)
-        print "Deleted virtual server: %s %s:%d" % (name)
+        print "Deleted virtual server: %s" % name
     except Exception as e:
         print e
 
@@ -167,7 +167,7 @@ def delete_service_group(name):
         service_group = NSServiceGroup()
         service_group.set_servicegroupname(name)
         NSServiceGroup.delete(g_nitro, service_group)
-        print "Deleted service group: %s %s" % (name)
+        print "Deleted service group: %s" % name
     except Exception as e:
         print e
 
