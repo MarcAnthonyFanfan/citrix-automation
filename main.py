@@ -19,6 +19,8 @@ def main():
         print "Missing ISSUE_ID environment variable"
         print "exiting..."
         exit()
+    # Trigger transition to queued state on Jira
+    notify_jira_of_queueing(env_issue_id)
     request = LBvServerRequest(env_issue_id)
     # 0) Login to NetScaler
     init_nitro()
@@ -26,9 +28,6 @@ def main():
     # TODO: Transition Jira ticket to status="Jenkins Processing Request"
     #       Currently, we skip directly to this step, when the request should
     #       stay in status="Waiting on Jenkins" until this point in the script
-    # TODO: Add other persistence types
-    #       Not a simple task, might be better to just
-    #       require users to config persistence manually
     # 1) Create LB vServer
     create_virtual_server(
         request.vserver_name,
@@ -56,6 +55,7 @@ def main():
     # 5) Binding Service Group to LB vServer
     bind_service_group_to_virtual_server("test-sgroup", "test-vserver")
     save_nitro()
+    # Trigger transition to created state on Jira
     notify_jira_of_creation(env_issue_id)
 
 def init_nitro():
@@ -150,7 +150,7 @@ def bind_monitor_to_service_group(monitor_name, service_group_name):
     except Exception as e:
         print e
 
-def notify_jira_of_creation(issue_key):
+def notify_jira_of_queueing(issue_key):
     global g_jira_base_url, g_jira_service_account_username, g_jira_service_account_password
     headers = {'Content-type': 'application/json'}
     r = requests.post(
@@ -165,6 +165,24 @@ def notify_jira_of_creation(issue_key):
     )
     if r.status_code == 204:
         print "Changed Jira issue status to Complete"
+    else:
+        print "Error changing Jira issue status"
+
+def notify_jira_of_creation(issue_key):
+    global g_jira_base_url, g_jira_service_account_username, g_jira_service_account_password
+    headers = {'Content-type': 'application/json'}
+    r = requests.post(
+        g_jira_base_url + "/rest/api/2/issue/%s/transitions" % issue_key,
+        auth = (g_jira_service_account_username, g_jira_service_account_password),
+        json = {
+            "transition": {
+                "id": "51"
+            }
+        },
+        headers = headers
+    )
+    if r.status_code == 204:
+        print "Changed Jira issue status to Queued"
     else:
         print "Error changing Jira issue status"
 
